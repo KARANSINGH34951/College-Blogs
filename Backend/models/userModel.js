@@ -4,7 +4,6 @@ import { Schema } from 'mongoose';
 const  UserSchema=new Schema({
   name:{
     type:String,
-    minLength:30
   },
   email:{
     type:String,
@@ -13,7 +12,6 @@ const  UserSchema=new Schema({
   },
   password:{
     type:String,
-    unique:true,
     required:true
   }
 })
