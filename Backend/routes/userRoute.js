@@ -6,7 +6,7 @@ const userRouter=express.Router();
 
 userRouter.post("/signup",async (req,res)=>{
   try {
-    const {name,email,password}=req.body;
+    const {name,email,password,bio}=req.body;
 
     const hashedpassword=await bcrypt.hash(password,8);
 
@@ -14,6 +14,7 @@ userRouter.post("/signup",async (req,res)=>{
       name,
       email,
       password:hashedpassword,
+      bio
     })
 
     const saveduser=await user.save();
@@ -35,12 +36,12 @@ userRouter.post("/login",async (req,res)=>{
       if(comparepassword){
 
         const token=jsonwebtoken.sign({
-          _id:userModel._id,
-          email:userModel.email
+          _id:user._id,
+          email:user.email
         },"karan@1234",{expiresIn:"2h"});
 
         res.cookie("token",token);
-        res.send("Login success !")
+        res.send(token)
       }
     }
   } catch (error) {
