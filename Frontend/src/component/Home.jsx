@@ -1,30 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import FlashMessage from './FlashMessage'; 
+import FlashMessage from './FlashMessage';
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
-  const [readBlogs, setReadBlogs] = useState([]); 
-  const [flashMessage, setFlashMessage] = useState(''); 
+  const [readBlogs, setReadBlogs] = useState([]);
+  const [flashMessage, setFlashMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalBlogs, setTotalBlogs] = useState(0);
-  const blogsPerPage = 6; 
+  const [searchTerm, setSearchTerm] = useState(''); 
+  const blogsPerPage = 6;
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3444/blog?page=${currentPage}&limit=${blogsPerPage}`);
-        setBlogs(response.data.blogs);
+  const fetchData = async (search = '') => {
+    try {
+      const response = await axios.get(`http://localhost:3444/blog?page=${currentPage}&limit=${blogsPerPage}&search=${search}`);
+      setBlogs(response.data.blogs);
+      setTotalBlogs(response.data.totalBlogs);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-        setTotalBlogs(response.data.totalBlogs);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchData();
-  }, [currentPage]); 
+  useEffect(() => {
+    fetchData(searchTerm); 
+  }, [currentPage, searchTerm]); 
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); 
+  };
 
   const handleReadMore = (id) => {
     navigate(`/blog/${id}`);
@@ -33,7 +39,7 @@ const Home = () => {
   const handleAlreadyRead = (id) => {
     setReadBlogs((prevReadBlogs) => [...prevReadBlogs, id]);
     setFlashMessage('Blog marked as read!');
-    setTimeout(() => setFlashMessage(''), 3000); 
+    setTimeout(() => setFlashMessage(''), 3000);
   };
 
   const totalPages = Math.ceil(totalBlogs / blogsPerPage);
@@ -41,6 +47,17 @@ const Home = () => {
   return (
     <div>
       {flashMessage && <FlashMessage message={flashMessage} onClose={() => setFlashMessage('')} />}
+      
+      <div className="p-6">
+        <input
+          type="text"
+          placeholder="Search blogs..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="p-2 border border-gray-300 rounded mb-4 w-full"
+        />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
         {blogs.map((blog) => (
           <div key={blog._id} className="border border-gray-300 rounded-lg shadow-md overflow-hidden flex flex-col">
@@ -59,7 +76,7 @@ const Home = () => {
               <button
                 onClick={() => handleAlreadyRead(blog._id)}
                 className={`py-2 px-4 rounded ${readBlogs.includes(blog._id) ? 'bg-gray-400' : 'bg-green-500'} text-white hover:bg-green-600 transition`}
-                disabled={readBlogs.includes(blog._id)} 
+                disabled={readBlogs.includes(blog._id)}
               >
                 {readBlogs.includes(blog._id) ? 'Already Read' : 'Mark as Read'}
               </button>
@@ -69,17 +86,17 @@ const Home = () => {
       </div>
 
       <div className="flex justify-center my-4">
-        <button 
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} 
-          disabled={currentPage === 1} 
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
           className="px-4 py-2 bg-purple-600 text-white rounded-l disabled:bg-gray-300"
         >
           Previous
         </button>
         <span className="px-4 py-2">{currentPage} / {totalPages}</span>
-        <button 
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} 
-          disabled={currentPage === totalPages} 
+        <button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
           className="px-4 py-2 bg-purple-600 text-white rounded-r disabled:bg-gray-300"
         >
           Next

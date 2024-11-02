@@ -27,19 +27,27 @@ blogRoute.post("/createblog", UserAuth, async (req, res) => {
 blogRoute.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; 
-    const limit = parseInt(req.query.limit) || 6; 
+    const limit = parseInt(req.query.limit) || 6;
+    const search = req.query.search || ''; 
     const skip = (page - 1) * limit;
-    const blogs = await blogModel.find()
+
+    const query = search 
+      ? { $or: [{ title: { $regex: search, $options: 'i' } }, { content: { $regex: search, $options: 'i' } }] }
+      : {};
+
+    const blogs = await blogModel.find(query)
       .populate("createdby", "name email")
       .skip(skip)
       .limit(limit);
 
-    const totalBlogs = await blogModel.countDocuments(); 
-    res.status(200).json({ blogs, totalBlogs }); 
+    const totalBlogs = await blogModel.countDocuments(query); 
+    
+    res.status(200).json({ blogs, totalBlogs });
   } catch (error) {
     res.status(500).json({ message: "Error retrieving blogs", error: error.message });
   }
 });
+
 
 
 blogRoute.get("/:id", async (req, res) => {
