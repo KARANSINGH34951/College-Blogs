@@ -24,14 +24,23 @@ blogRoute.post("/createblog", UserAuth, async (req, res) => {
 });
 
 
-blogRoute.get("/allblogs", async (req, res) => {
+blogRoute.get("/", async (req, res) => {
   try {
-    const blogs = await blogModel.find().populate("createdby", "name email"); 
-    res.status(200).json(blogs);
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 6; 
+    const skip = (page - 1) * limit;
+    const blogs = await blogModel.find()
+      .populate("createdby", "name email")
+      .skip(skip)
+      .limit(limit);
+
+    const totalBlogs = await blogModel.countDocuments(); 
+    res.status(200).json({ blogs, totalBlogs }); 
   } catch (error) {
     res.status(500).json({ message: "Error retrieving blogs", error: error.message });
   }
 });
+
 
 blogRoute.get("/:id", async (req, res) => {
   try {

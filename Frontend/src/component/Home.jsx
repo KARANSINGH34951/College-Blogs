@@ -7,19 +7,24 @@ const Home = () => {
   const [blogs, setBlogs] = useState([]);
   const [readBlogs, setReadBlogs] = useState([]); 
   const [flashMessage, setFlashMessage] = useState(''); 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalBlogs, setTotalBlogs] = useState(0);
+  const blogsPerPage = 6; 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3444/blog/allblogs');
-        setBlogs(response.data);
+        const response = await axios.get(`http://localhost:3444/blog?page=${currentPage}&limit=${blogsPerPage}`);
+        setBlogs(response.data.blogs);
+
+        setTotalBlogs(response.data.totalBlogs);
       } catch (err) {
         console.error(err);
       }
     };
     fetchData();
-  }, []);
+  }, [currentPage]); 
 
   const handleReadMore = (id) => {
     navigate(`/blog/${id}`);
@@ -30,6 +35,8 @@ const Home = () => {
     setFlashMessage('Blog marked as read!');
     setTimeout(() => setFlashMessage(''), 3000); 
   };
+
+  const totalPages = Math.ceil(totalBlogs / blogsPerPage);
 
   return (
     <div>
@@ -59,6 +66,24 @@ const Home = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="flex justify-center my-4">
+        <button 
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} 
+          disabled={currentPage === 1} 
+          className="px-4 py-2 bg-purple-600 text-white rounded-l disabled:bg-gray-300"
+        >
+          Previous
+        </button>
+        <span className="px-4 py-2">{currentPage} / {totalPages}</span>
+        <button 
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} 
+          disabled={currentPage === totalPages} 
+          className="px-4 py-2 bg-purple-600 text-white rounded-r disabled:bg-gray-300"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
