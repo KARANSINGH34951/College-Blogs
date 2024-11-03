@@ -48,13 +48,13 @@ const Home = () => {
     <div>
       {flashMessage && <FlashMessage message={flashMessage} onClose={() => setFlashMessage('')} />}
       
-      <div className="p-6">
+      <div className="p-6 flex justify-center items-center">
         <input
           type="text"
           placeholder="Search blogs..."
           value={searchTerm}
           onChange={handleSearchChange}
-          className="p-2 border border-gray-300 rounded mb-4 w-full"
+          className="p-3 border-4 border-purple-400 rounded-full mb-4 w-1/2"
         />
       </div>
 

@@ -32,7 +32,7 @@ blogRoute.get("/", async (req, res) => {
     const skip = (page - 1) * limit;
 
     const query = search 
-      ? { $or: [{ title: { $regex: search, $options: 'i' } }, { content: { $regex: search, $options: 'i' } }] }
+      ? { $or: [{ title: { $regex: search, $options: 'i' } }] }
       : {};
 
     const blogs = await blogModel.find(query)
