@@ -6,7 +6,7 @@ const userRouter=express.Router();
 
 userRouter.post("/signup",async (req,res)=>{
   try {
-    const {name,email,password,bio}=req.body;
+    const {name,email,password,bio,role}=req.body;
 
     const hashedpassword=await bcrypt.hash(password,8);
 
@@ -14,10 +14,13 @@ userRouter.post("/signup",async (req,res)=>{
       name,
       email,
       password:hashedpassword,
+      role,
       bio
     })
 
     const saveduser=await user.save();
+    console.log(saveduser);
+    
     res.send(saveduser);
   } catch (error) {
     res.status(402).send({message:"Not Found !"})
